@@ -28,7 +28,7 @@ LeagueName = poetiergen_config.GetLeagueName()
 
 download_mode = False
 
-write_mode = False
+write_mode = True
 
 dbg_print = True
 
@@ -43,7 +43,7 @@ NotDroppedList = [
         "The Goddess Scorned",
         "The Anima Stone",
         "The Retch",
-        "Loreweave"
+        "Loreweave",
     # Vaal Only
         "Blood of Corruption",
     # Pieces Only
@@ -348,6 +348,8 @@ url_uniques = [
     "http://poe.ninja/api/Data/GetUniqueAccessoryOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
     # Jewel URL
     "http://poe.ninja/api/Data/GetUniqueJewelOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
+    # Unique Map URL
+    "http://poe.ninja/api/Data/GetUniqueMapOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
 ]
 # Div Card URL
 url_div = "http://poe.ninja/api/Data/GetDivinationCardsOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d")
@@ -357,7 +359,8 @@ json_unique_filepaths = [
     os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueWeaponOverview.json'),
     os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueFlaskOverview.json'),
     os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueAccessoryOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueJewelOverview.json')
+    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueJewelOverview.json'),
+    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueMapOverview.json')
 ]
 json_div_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetDivinationCardsOverview.json')
 
@@ -408,8 +411,8 @@ else:
         for url in url_uniques:
             print(url)
         print(url_div)
-        for cat in itertools.chain(UniqueCategories, UniqueMultiBaseCategory):
-            if "War Hammer" in cat[2]:
-                print(cat[0])
+        # for cat in itertools.chain(UniqueCategories, UniqueMultiBaseCategory):
+        #     if "War Hammer" in cat[2]:
+        #         print(cat[0])
     else:
         print(DivEx)

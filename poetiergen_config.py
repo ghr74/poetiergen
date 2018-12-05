@@ -1,7 +1,7 @@
 #! python3.6
 # -- CONFIG --
 
-filter_file_name = r'StartingExfilterIncursion.filter'
+filter_file_name = r'ExfilterBetrayal.filter'
 
 UniqueExCategory = '%TB-Uniques-Exception'
 #                           Category Name,              Min Tier for MultiBase
@@ -18,9 +18,9 @@ UniqueExCategory = '%TB-Uniques-Exception'
 UniqueMultiBaseCategory = [['%TB-Uniques-T2-MultiBase', 2, list()]]
 UniqueCategories = sorted([
     # Category Name , Min Price (Chaos)
-    ['%TB-Uniques-T1', 15, list()],
+    ['%TB-Uniques-T1', 25, list()],
     ['%TB-Uniques-T2', 5, list()],
-    ['%TB-Uniques-T3', 3, list()],
+    ['%TB-Uniques-T3', 2, list()],
     ['%TB-Uniques-T4', 0, list()],
 ], key=lambda UniqueCategory: UniqueCategory[1], reverse=True)
 
@@ -28,15 +28,14 @@ DivExCategory = '%TB-Divination-Exception'
 DivCategories = sorted([
     # Category Name , Min Price (Chaos)
     ['%TB-Divination-T1', 15, list()],
-    ['%TB-Divination-T2', 5, list()],
-    ['%TB-Divination-T3', 2, list()],
+    ['%TB-Divination-T3', 1, list()],
     ['%TB-Divination-T4', 0, list()],
 ], key=lambda DivCategory: DivCategory[1], reverse=True)
 
 # Armed = Download + Write
-Armed_Mode = True
+Armed_Mode = False
 
-LeagueName = r"Incursion"
+LeagueName = r"Delve"
 
 # -- END CONFIG --
 

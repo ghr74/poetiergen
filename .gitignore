@@ -1,7 +1,11 @@
 *.json
+*.csv
 __pycache__/
 *.py[cod]
 *$py.class
 
+old_files/
 backupcopy.py
 poetiergen.txt
+testoutput.txt
+testing.py

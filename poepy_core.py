@@ -5,37 +5,21 @@ import regex
 from timeit import default_timer as timer
 import time
 import requests
+import requests_cache
 import poetiergen_constants as constants
 from textwrap import dedent, indent
 
 category_regex = r'[\s\w]*BaseType\s\K.*'
 # base_regex = r'(?:# %TB-Bases){1}(?m)(?:[\s]*Show # %TB-Bases[\s\S]*?(?:BaseType.*))*'
 
-url_uniques = []
-url_div = ""
-url_bases = ""
+# league_name = ""
 
-def SetURLs(LeagueName):
-    global url_uniques
-    global url_div
-    global url_bases
-    url_uniques = [
-        # Armour URL
-        "http://poe.ninja/api/Data/GetUniqueArmourOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-        # Weapon URL
-        "http://poe.ninja/api/Data/GetUniqueWeaponOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-        # Flask URL
-        "http://poe.ninja/api/Data/GetUniqueFlaskOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-        # Accessory URL
-        "http://poe.ninja/api/Data/GetUniqueAccessoryOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-        # Jewel URL
-        "http://poe.ninja/api/Data/GetUniqueJewelOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-        # Unique Map URL
-        "http://poe.ninja/api/Data/GetUniqueMapOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d"),
-    ]
-    # Div Card URL
-    url_div = "http://poe.ninja/api/Data/GetDivinationCardsOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d")
-    url_bases = "http://poe.ninja/api/Data/GetBaseTypeOverview?league=" + LeagueName + "&date=" + time.strftime("%Y-%m-%d")
+# def SetURLs(LeagueName):
+#     pass
+    # global league_name
+    # league_name = LeagueName
+
+requests_cache.install_cache('ninja_data', expire_after=172800)
 
 def FileToJson(filepath):
     file_data = ""
@@ -43,40 +27,43 @@ def FileToJson(filepath):
         file_data = json_file.read()
     return json.loads(file_data).get('lines')
 
-def DownloadJson(url):
-    print("Downloading from: ", url)
-    r = requests.get(url)
+# MORE URL PARAMS: Essences: 'Essence', Currency: 'Currency', Fragments: 'Fragment', Scarabs: 'Scarab', Fossils: 'Fossil', Resonators: 'Resonator'
+
+def DownloadJson(league_param, type_param):
+    payload = {'league': league_param, 'type': type_param}
+    r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
+    print(f"Downloaded from: {r.url} - {r.from_cache}")
     r.encoding = 'ISO-8859-1'
-    print("Download done, loading dataset...")
     return r.json().get('lines')
 
-def GetDivinationData(download=False):
+def GetDivinationData(league=None, download=False):
     div_data = {}
-    if download:
+    if download and league is not None:
         print("Starting Download...")
-        div_data = DownloadJson(url_div)
-        print("Download / Load complete.")
+        div_data = DownloadJson(league, 'DivinationCard')
+        print("Download complete.")
     else:
         div_data = FileToJson(constants.json_div_filepath)
     return div_data
 
-def GetBasesData(download=False):
+def GetBasesData(league=None, download=False):
     bases_data = {}
-    if download:
+    if download and league is not None:
         print(f"Starting Download...")
-        bases = DownloadJson(url_bases)
-        print("Download / Load complete.")
+        bases = DownloadJson(league, 'BaseType')
+        print("Download complete.")
     else:
         bases = FileToJson(constants.json_bases_filepath)
     return bases
 
-def GetUniquesData(download=False):
+def GetUniquesData(league=None, download=False):
     uniques_data = []
-    if download:
+    param_uniques = ['UniqueArmour', 'UniqueWeapon', 'UniqueFlask', 'UniqueAccessory', 'UniqueJewel', 'UniqueMap']
+    if download and league is not None:
         print("Starting Download...")
-        for url in url_uniques:
-            uniques_data.append(DownloadJson(url))
-        print("Download / Load complete.")
+        for param in param_uniques:
+            uniques_data.append(DownloadJson(league, param))
+        print("Download complete.")
     else:
         for path in constants.json_unique_filepaths:
             uniques_data.append(FileToJson(path))

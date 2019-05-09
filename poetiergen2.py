@@ -65,29 +65,29 @@ uniques_category_settings=None, divination_category_settings=None, bases_section
         # print(bases_section_string)
 
 def GenerateDivinationTiers(league_name, download_mode, min_price, divination_exception_categories=[]):
-    core.SetURLs(league_name)
+    # core.SetURLs(league_name)
     divination_exceptions = []
     for cat in divination_exception_categories:
         divination_exceptions.extend(cat.geta('BaseType'))
     print(divination_exceptions)
-    div_data = core.GetDivinationData(download_mode)
+    div_data = core.GetDivinationData(league_name, download_mode)
     div_garbage, div_ex = calcs.calc_div_cards(min_price, div_data, divination_exceptions)
     return div_garbage, div_ex
 
 def GenerateUniqueTiers(league_name, download_mode, min_price, uniques_exception_categories=[]):
-    core.SetURLs(league_name)
+    # core.SetURLs(league_name)
     unique_exceptions = []
     for cat in uniques_exception_categories:
         unique_exceptions.extend(cat.geta('BaseType'))
     print(unique_exceptions)
-    unique_data = core.GetUniquesData(download_mode)
+    unique_data = core.GetUniquesData(league_name, download_mode)
     unique_garbage, unique_ex, unique_mixed = calcs.calc_uniques(min_price, unique_data, unique_exceptions)
     return unique_garbage, unique_ex, unique_mixed
 
 def GenerateShaperElderSection(league_name, section, min_price, style_chaos, style_ex, download_mode=False):
     from poefilter import Category
-    core.SetURLs(league_name)
-    bases_data = core.GetBasesData(download_mode)
+    # core.SetURLs(league_name)
+    bases_data = core.GetBasesData(league_name, download_mode)
     bases_chaos, bases_ex = calcs.calc_item_bases(min_price, bases_data)
     for tier, baseDataframe in enumerate((bases_ex, bases_chaos), start=1):
         for (variant, ilvl), group in baseDataframe.groupby(['variant', 'levelRequired']):

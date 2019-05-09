@@ -4,7 +4,7 @@ from poepy_core import write_to_file
 import poetiergen2
 
 league_name = r'Synthesis'
-download_mode = False
+download_mode = True
 
 exfilter = pf.FilterObj("version for Synthesis League - blackytemp version based on CuteDog_ version - not recommended for anyone")
 exfilter.append(pf.Section("QUEST & EXTRA",
@@ -265,7 +265,7 @@ exfilter.append(pf.Section("Final Filter Management",
 exfilter.sections['Shaper/Elder Items'] = poetiergen2.GenerateShaperElderSection(
     league_name,
     exfilter.sections['Shaper/Elder Items'], 
-    21, 
+    15, 
     styles.STYLE_SHAPERELDER_CHAOS, 
     styles.STYLE_SHAPERELDER_EXALT,
     download_mode
@@ -276,7 +276,7 @@ exfilter.sections['Shaper/Elder Items'] = poetiergen2.GenerateShaperElderSection
 div_garbage, div_ex = poetiergen2.GenerateDivinationTiers(
     league_name,
     download_mode,
-    21,
+    2,
     exfilter.exception_from_section('Divination Cards'),
 )
 
@@ -288,7 +288,7 @@ exfilter.sections['Divination Cards'].categories['Divination Garbage'].seta(Base
 unique_garbage, unique_ex, unique_mixed = poetiergen2.GenerateUniqueTiers(
     league_name,
     download_mode,
-    21,
+    8,
     exfilter.exception_from_section('Uniques'),
 )
 

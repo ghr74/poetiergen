@@ -1,6 +1,6 @@
 import os
 from importlib import reload
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -21,16 +21,37 @@ class EvaluatedData:
         self.type = type_
         self.data = data
 
-    def as_json(self, file_name: Optional[str] = None) -> str:
+    def as_json(self, file_name: Optional[str] = None, col: str = None) -> str:
+        fx_data: Union[pd.DataFrame, pd.Series] = self.data
+        if col is not None:
+            fx_data = fx_data.groupby(col).apply(lambda g: g.to_dict(orient="records"))
         if file_name is not None:
-            self.data.to_json(path_or_buf=file_name)
-        return self.data.to_json()
+            fx_data.to_json(path_or_buf=file_name)
+        return fx_data.to_json()
 
-    def as_garbo_ex(self, min_price: float, col: str) -> Tuple[List[str], List[str]]:
+    def as_garbo_ex(
+        self, min_price: float, col: str = "baseType"
+    ) -> Tuple[List[str], List[str]]:
         m = self.data["aValue"] >= min_price
         cdf, garbo = self.data[m], self.data[~m]
         ex = cdf[cdf.exaltedValue >= 1]
         return garbo[col].values.tolist(), ex[col].values.tolist()
+
+    def as_garbo_ex_mixed(
+        self, min_price, col: str = "baseType"
+    ) -> Tuple[List[str], List[str], List[str]]:
+        gvq = self.data.groupby("baseType")
+        garbo, ex, mixed = [], [], []
+        for bt, group in gvq:
+            if group.sort_values(by="exaltedValue")["exaltedValue"].iat[0] >= 1:
+                ex.append(bt)
+            else:
+                maxPrice = group["chaosValue"].max()
+                if maxPrice < min_price:
+                    garbo.append(bt)
+                elif maxPrice >= min_price and group["chaosValue"].min() < min_price:
+                    mixed.append(bt)
+        return garbo, ex, mixed
 
     def as_chaos_ex_frames(self, min_price: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         cdf = self.data.query(
@@ -45,10 +66,12 @@ class EvaluatedData:
 
 
 def calc_div_cards(
-    download: bool = False, json_data: List[dict] = None, exceptions: List[str] = []
+    league_name: str, download: bool = False, exceptions: List[str] = []
 ) -> EvaluatedData:
     json_data = (
-        json_data if json_data is not None else core.FileToJson(json_div_filepath)
+        core.GetDivinationData(league_name, download)
+        if download
+        else core.FileToJson(json_div_filepath)
     )
     df = pd.DataFrame(json_data)
     df = df[~df["name"].isin(exceptions)]
@@ -62,11 +85,11 @@ def calc_div_cards(
 
 
 def calc_uniques(
-    min_price: float, json_data: List[List[dict]] = None, exceptions: List[str] = []
-) -> Tuple[List[str], List[str], List[str]]:
+    league_name: str, download: bool = False, exceptions: List[str] = []
+) -> EvaluatedData:
     json_data = (
-        json_data
-        if json_data is not None
+        core.GetUniquesData(league_name, download)
+        if download
         else [core.FileToJson(js) for js in json_unique_filepaths]
     )
     df = pd.concat((pd.DataFrame(f) for f in json_data), ignore_index=True, sort=True)
@@ -74,28 +97,17 @@ def calc_uniques(
     df = df.query(
         "name not in @NotDroppedList and links < 5"
     )  # doing df[~df['name'].isin(NotDroppedList)][df['links']<5] is slightly faster but looks worse v0v
-    gvq = df.groupby("baseType")
-    garbo, ex, mixed = [], [], []
-    for bt, group in gvq:
-        if group.sort_values(by="exaltedValue")["exaltedValue"].iat[0] >= 1:
-            ex.append(bt)
-        else:
-            maxPrice = group["chaosValue"].max()
-            if maxPrice < min_price:
-                garbo.append(bt)
-            elif maxPrice >= min_price and group["chaosValue"].min() < min_price:
-                mixed.append(bt)
-    return garbo, ex, mixed
+    return EvaluatedData("Uniques", df)
 
 
 # Bases Tiering:
 
 
-def calc_item_bases(
-    download: bool = False, json_data: List[dict] = None
-) -> EvaluatedData:
+def calc_item_bases(league_name: str, download: bool = False) -> EvaluatedData:
     json_data = (
-        json_data if json_data is not None else core.FileToJson(json_bases_filepath)
+        core.GetBasesData(league_name, download)
+        if download
+        else core.FileToJson(json_bases_filepath)
     )
     df = pd.DataFrame(json_data)
     # df['variant'].fillna('Normal', inplace=True)

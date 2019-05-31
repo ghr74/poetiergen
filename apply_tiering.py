@@ -15,38 +15,27 @@ exfilter = pf.FilterObj().from_file(filter_file_name)
 
 # Shaper/Elder Tiering
 
-# exfilter['Shaper/Elder Items'] = poetiergen2.GenerateShaperElderSection(
-#     league_name,
-#     exfilter.sections['Shaper/Elder Items'],
-#     15,
-#     styles.STYLE_SHAPERELDER_CHAOS,
-#     styles.STYLE_SHAPERELDER_EXALT,
-#     download_mode
-# )
+poetiergen2.GenerateShaperElderSectionFromTag(
+    league_name,
+    download_mode,
+    shaperelder_cutoff,
+    styles.STYLE_SHAPERELDER_CHAOS,
+    styles.STYLE_SHAPERELDER_EXALT,
+    exfilter,
+)
 
 # Divination Tiering
 
-div_garbage, div_ex = poetiergen2.GenerateDivinationTiers(
-    league_name,
-    download_mode,
-    divination_cutoff,
-    exfilter.exception_from_section("Divination Cards"),
+poetiergen2.GenerateDivinationTiersFromTag(
+    league_name, download_mode, divination_cutoff, exfilter
 )
 
-exfilter["Divination Cards"]["Divination T1"]["BaseType"] = div_ex
-exfilter["Divination Cards"]["Divination Garbage"]["BaseType"] = div_garbage
 
 # Uniques Tiering
 
-unique_garbage, unique_ex, unique_mixed = poetiergen2.GenerateUniqueTiers(
-    league_name,
-    download_mode,
-    uniques_cutoff,
-    exfilter.exception_from_section("Uniques"),
+poetiergen2.GenerateUniqueTiersFromTag(
+    league_name, download_mode, uniques_cutoff, exfilter
 )
-
-exfilter["Uniques"]["Uniques T1"]["BaseType"] = unique_ex
-exfilter["Uniques"]["Uniques Garbage"]["BaseType"] = unique_garbage
 
 # path_to_filter = r'testoutput.filter'
 

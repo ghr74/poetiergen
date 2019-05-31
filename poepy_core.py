@@ -1,14 +1,16 @@
 #! python3.6
 
-from typing import Any, List
 import json
-import regex
-from timeit import default_timer as timer
 import time
+from textwrap import dedent, indent
+from timeit import default_timer as timer
+from typing import Any, Dict, List
+
+import regex
 import requests
 import requests_cache
+
 import poetiergen_constants as constants
-from textwrap import dedent, indent
 
 category_regex = r"[\s\w]*BaseType\s\K.*"
 # base_regex = r'(?:# %TB-Bases){1}(?m)(?:[\s]*Show # %TB-Bases[\s\S]*?(?:BaseType.*))*'
@@ -23,7 +25,7 @@ category_regex = r"[\s\w]*BaseType\s\K.*"
 requests_cache.install_cache("ninja_data", expire_after=172800)
 
 
-def FileToJson(filepath):
+def FileToJson(filepath: str) -> List[dict]:
     file_data = ""
     with open(filepath, "r") as json_file:
         file_data = json_file.read()
@@ -33,15 +35,15 @@ def FileToJson(filepath):
 # MORE URL PARAMS: Essences: 'Essence', Currency: 'Currency', Fragments: 'Fragment', Scarabs: 'Scarab', Fossils: 'Fossil', Resonators: 'Resonator'
 
 
-def DownloadJson(league_param, type_param):
+def DownloadJson(league_param: str, type_param: str) -> List[Dict]:
     payload = {"league": league_param, "type": type_param}
     r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
-    print(f"Downloaded from: {r.url} - {r.from_cache}")
+    print(f"Downloaded from: {r.url} - {r.from_cache}")  # type: ignore
     r.encoding = "ISO-8859-1"
     return r.json().get("lines")
 
 
-def GetDivinationData(league: str = None, download: bool = False) -> dict:
+def GetDivinationData(league: str = None, download: bool = False) -> List[dict]:
     if download and league is not None:
         print("Starting Download...")
         div_data = DownloadJson(league, "DivinationCard")
@@ -51,7 +53,7 @@ def GetDivinationData(league: str = None, download: bool = False) -> dict:
     return div_data
 
 
-def GetBasesData(league: str = None, download: bool = False) -> dict:
+def GetBasesData(league: str = None, download: bool = False) -> List[dict]:
     if download and league is not None:
         print(f"Starting Download...")
         bases = DownloadJson(league, "BaseType")
@@ -61,7 +63,7 @@ def GetBasesData(league: str = None, download: bool = False) -> dict:
     return bases
 
 
-def GetUniquesData(league: str = None, download: bool = False) -> List[dict]:
+def GetUniquesData(league: str = None, download: bool = False) -> List[List[dict]]:
     uniques_data = []
     param_uniques = [
         "UniqueArmour",

@@ -1,7 +1,7 @@
 import copy
 from collections import defaultdict
 from textwrap import dedent, indent
-from typing import Any, Callable, Iterator, List, Union
+from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Union
 
 from poepy_core import BaseTypeString
 
@@ -38,7 +38,7 @@ class Style:
         PlayAlertSound: str = None,
         CustomAlertSound: str = None,
     ) -> None:
-        self.attributes = {}
+        self.attributes: Dict[str, Any] = {}
         self.attributes["SetFontSize"] = SetFontSize
         self.attributes["SetTextColor"] = SetTextColor
         self.attributes["SetBackgroundColor"] = SetBackgroundColor
@@ -84,7 +84,7 @@ class Category:
         self.comment = comment
         self.show = show
         self.tags = tags
-        self.attributes = {}
+        self.attributes: Dict[str, Any] = {}
         for k, v in kwargs.items():
             self.attributes[k] = v
 
@@ -141,7 +141,7 @@ class Section:
     ):
         self.comment = comment
         self.tags = tags
-        self.categories = {}
+        self.categories: Dict[str, Category] = {}
         for category in initial_categories:
             self.append(category)
 
@@ -149,7 +149,10 @@ class Section:
         self.categories[category.comment] = category
 
     def __getitem__(self, key: str) -> Category:
-        return self.categories.get(key)
+        if key in self.categories:
+            return self.categories[key]
+        else:
+            raise KeyError
 
     def __setitem__(self, key: str, value: Category) -> None:
         self.categories[key] = value
@@ -170,56 +173,63 @@ class Section:
 
 class FilterObj:
     def __init__(self, comment: str = "Filter header comment") -> None:
-        self.sections = {}
-        self.styles = []
-        self.tags = defaultdict(list)
+        self.sections: Dict[str, Section] = {}
+        self.styles: List[Style] = []
+        self.tags: DefaultDict[str, List[Union[Category, Section]]] = defaultdict(list)
         self.comment = comment
 
     @staticmethod
     def from_file(source_file: str) -> "FilterObj":
-        current_filter = None
+        current_filter: Optional[FilterObj] = None
         with open(source_file, "r") as source_fp:
             lines = [l.strip() for l in source_fp]
-            current_section = None
-            current_category = None
+            current_section: Optional[Section] = None
+            current_category: Optional[Category] = None
             for line in lines:
                 if "# Filter:" in line:
                     current_filter = FilterObj(line.replace("# Filter:\t#\t", ""))
                 elif "# Section:" in line:
                     if all(c is not None for c in {current_category, current_section}):
-                        current_section.append(current_category)
+                        current_section.append(current_category)  # type: ignore
                     if current_section is not None:
-                        current_filter.append(current_section)
+                        current_filter.append(current_section)  # type: ignore
                         current_section = None
                         current_category = None
-                    line = line.replace("# Section:\t#\t", "").split(" ~ ")
-                    sec_name, sec_tags = line[0], line[1:]
+                    line_args: List[str] = line.replace("# Section:\t#\t", "").split(
+                        " ~ "
+                    )
+                    sec_name, sec_tags = line_args[0], line_args[1:]
                     current_section = Section(sec_name, tags=sec_tags)
                     for tag in sec_tags:
-                        current_filter.tags[tag].append(current_section)
+                        current_filter.tags[tag].append(current_section)  # type: ignore
                 elif line.startswith("#"):
                     pass
                 else:
+                    val: Union[str, List[str]]
                     com, val = line.split(" ", 1)
                     if any(c in com for c in {"Show", "Hide"}):
                         if all(
                             c is not None for c in {current_category, current_section}
                         ):
-                            current_section.append(current_category)
+                            current_section.append(current_category)  # type: ignore
                             current_category = None
-                        val = val.replace("# ", "").split(" ~ ")
+                        val = val.replace("# ", "").split(" ~ ")  # type: ignore
                         cat_name, cat_tags = val[0], val[1:]
                         current_category = Category(
                             cat_name, (1 if "Show" in com else 2), tags=cat_tags
                         )
                         for tag in cat_tags:
-                            current_filter.tags[tag].append(current_category)
+                            current_filter.tags[tag].append(  # type: ignore
+                                current_category
+                            )
                     else:
                         if '"' in val:
                             val = [x.strip('"') for x in val.split('" "')]
-                        current_category.attributes[com] = val
-            current_section.append(current_category)
-            current_filter.append(current_section)
+                        current_category.attributes[com] = val  # type: ignore
+            current_section.append(current_category)  # type: ignore
+            current_filter.append(current_section)  # type: ignore
+        if current_filter is None:
+            current_filter = FilterObj()
         return current_filter
 
     def append(self, section: Section) -> None:
@@ -239,7 +249,10 @@ class FilterObj:
             fun(tagged)
 
     def __getitem__(self, key: str) -> Section:
-        return self.sections.get(key)
+        if key in self.sections:
+            return self.sections[key]
+        else:
+            raise KeyError
 
     def __setitem__(self, key: str, value: Section) -> None:
         self.sections[key] = value

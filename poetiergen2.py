@@ -1,12 +1,16 @@
 #! python3.6
-import os
-import regex
+import itertools
 import json
+import os
+from typing import List, Tuple
+
+import regex
 import requests
+
+import poepy_core as core
 import poetiergen_calcs as calcs
 import poetiergen_constants as constants
-import poepy_core as core
-import itertools
+from poefilter import Category, Section, Style
 
 # def FilteryThingy(filter_file_name, league_name, armed_mode=False,
 # uniques_exception_category=None, divination_exception_category=None,
@@ -66,10 +70,13 @@ import itertools
 
 
 def GenerateDivinationTiers(
-    league_name, download_mode, min_price, divination_exception_categories=[]
-):
+    league_name: str,
+    download_mode: bool,
+    min_price: float,
+    divination_exception_categories: List[Category] = [],
+) -> Tuple[List[str], List[str]]:
     # core.SetURLs(league_name)
-    divination_exceptions = []
+    divination_exceptions: List[str] = []
     for cat in divination_exception_categories:
         divination_exceptions.extend(cat.geta("BaseType"))
     print(divination_exceptions)
@@ -81,10 +88,13 @@ def GenerateDivinationTiers(
 
 
 def GenerateUniqueTiers(
-    league_name, download_mode, min_price, uniques_exception_categories=[]
-):
+    league_name: str,
+    download_mode: bool,
+    min_price: float,
+    uniques_exception_categories: List[Category] = [],
+) -> Tuple[List[str], List[str], List[str]]:
     # core.SetURLs(league_name)
-    unique_exceptions = []
+    unique_exceptions: List[str] = []
     for cat in uniques_exception_categories:
         unique_exceptions.extend(cat.geta("BaseType"))
     print(unique_exceptions)
@@ -96,10 +106,13 @@ def GenerateUniqueTiers(
 
 
 def GenerateShaperElderSection(
-    league_name, section, min_price, style_chaos, style_ex, download_mode=False
-):
-    from poefilter import Category
-
+    league_name: str,
+    section: Section,
+    min_price: float,
+    style_chaos: Style,
+    style_ex: Style,
+    download_mode: bool = False,
+) -> Section:
     # core.SetURLs(league_name)
     bases_data = core.GetBasesData(league_name, download_mode)
     bases_chaos, bases_ex = calcs.calc_item_bases(min_price, bases_data)

@@ -1,27 +1,30 @@
 import os
-
-import poepy_core as poepy
-import pandas as pd
-import neversink_processing as neversink
-import numpy as np
 from importlib import reload
+from typing import List, Tuple
+
+import numpy as np
+import pandas as pd
+
+import neversink_processing as neversink
+import poepy_core as poepy
 from poetiergen_constants import (
     NotDroppedList,
-    json_unique_filepaths,
+    bases_useless_columns,
     json_bases_filepath,
     json_div_filepath,
-    bases_useless_columns,
+    json_unique_filepaths,
 )
-
 
 # Div Card Tiering:
 
 
-def calc_div_cards(min_price, json_data=None, exceptions=[]):
+def calc_div_cards(
+    min_price: float, json_data: List[dict] = None, exceptions: List[str] = []
+) -> Tuple[List[str], List[str]]:
     json_data = (
         json_data if json_data is not None else poepy.FileToJson(json_div_filepath)
     )
-    df = pd.DataFrame.from_dict(json_data)
+    df = pd.DataFrame(json_data)
     df = df[~df["name"].isin(exceptions)]
     df.loc[:, "confidence"] = df.apply(neversink.evaluate_div_cards, axis=1)
     df.loc[:, "aValue"] = df.apply(lambda x: x["chaosValue"] * x["confidence"], axis=1)
@@ -38,15 +41,15 @@ def calc_div_cards(min_price, json_data=None, exceptions=[]):
 # Uniques Tiering:
 
 
-def calc_uniques(min_price, json_data=None, exceptions=[]):
+def calc_uniques(
+    min_price: float, json_data: List[List[dict]] = None, exceptions: List[str] = []
+) -> Tuple[List[str], List[str], List[str]]:
     json_data = (
         json_data
         if json_data is not None
         else [poepy.FileToJson(js) for js in json_unique_filepaths]
     )
-    df = pd.concat(
-        (pd.DataFrame.from_dict(f) for f in json_data), ignore_index=True, sort=True
-    )
+    df = pd.concat((pd.DataFrame(f) for f in json_data), ignore_index=True, sort=True)
     df = df[~df["baseType"].isin(exceptions)]
     df = df.query(
         "name not in @NotDroppedList and links < 5"
@@ -68,11 +71,13 @@ def calc_uniques(min_price, json_data=None, exceptions=[]):
 # Bases Tiering:
 
 
-def calc_item_bases(min_price, json_data=None):
+def calc_item_bases(
+    min_price: float, json_data: List[dict] = None
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     json_data = (
         json_data if json_data is not None else poepy.FileToJson(json_bases_filepath)
     )
-    df = pd.DataFrame.from_dict(json_data)
+    df = pd.DataFrame(json_data)
     # df['variant'].fillna('Normal', inplace=True)
     df = df[pd.notnull(df["variant"])]
 

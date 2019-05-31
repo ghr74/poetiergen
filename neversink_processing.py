@@ -41,8 +41,8 @@ unhealthyPriceRange = 500
 bt = pd.read_csv("BasetypeStorage.csv")
 
 
-def evaluate_div_cards(data):
-    confidence = 1
+def evaluate_div_cards(data: pd.DataFrame) -> float:
+    confidence = 1.0
     stackSize = data["stackSize"]
 
     confidence += ternary(stackSize <= 1, 0.2)
@@ -63,10 +63,10 @@ def evaluate_div_cards(data):
     return confidence
 
 
-def evaluate_bases(data):
+def evaluate_bases(data: pd.DataFrame) -> float:
     baseType = data.loc[:, "baseType"].iat[0]
 
-    confidence = 1
+    confidence = 1.0
 
     totalQuant = data["count"].sum()
     minPrice = data["chaosValue"].min()

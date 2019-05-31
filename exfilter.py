@@ -14,6 +14,7 @@ exfilter = pf.FilterObj(
 exfilter.append(
     pf.Section(
         "QUEST & EXTRA",
+        [],
         pf.Category(
             "QUEST & EXTRA",
             Class=[
@@ -33,6 +34,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Explicit Mod Filtering",
+        [],
         pf.Category(
             "Specific Mods",
             Identified=True,
@@ -85,6 +87,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Jeweller's Recipe & High Linked Sockets",
+        [],
         pf.Category(
             "Divine Orb Vendor Recipe",
             LinkedSockets=">= 6",
@@ -108,6 +111,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Uniques",
+        [],
         pf.Category(
             "5-Link uniques",
             LinkedSockets=5,
@@ -130,6 +134,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Divination Cards",
+        [],
         pf.Category(
             "Hidden Exceptions",
             show=pf.HIDE,
@@ -171,6 +176,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Currency",
+        [],
         pf.Category(
             "Currency Exalt Tier",
             Class=["Stackable Currency", "Delve Socketable Currency"],
@@ -318,6 +324,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Maps",
+        [],
         pf.Category(
             "Map Fragments", Class=["Map Fragments"], Style=styles.STYLE_MAP_FRAGMENTS
         ),
@@ -343,6 +350,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Skillgems",
+        [],
         pf.Category(
             "Gigagems",
             Class=["Gems"],
@@ -372,6 +380,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Magic/Rare Exceptions",
+        [],
         pf.Category(
             "Rare T1 Bases U wanna see hehe",
             BaseType=["Steel Ring", "Opal Ring", "Marble Amulet", "Talisman"],
@@ -419,6 +428,7 @@ exfilter.append(pf.Section("Shaper/Elder Items"))
 exfilter.append(
     pf.Section(
         "Chromatic Recipe",
+        [],
         pf.Category(
             "Chromatic Recipe",
             show=pf.DISABLE,
@@ -432,6 +442,7 @@ exfilter.append(
 exfilter.append(
     pf.Section(
         "Final Filter Management",
+        [],
         pf.Category(
             "Hide all <= Rare items",
             show=pf.HIDE,
@@ -481,9 +492,11 @@ div_garbage, div_ex = poetiergen2.GenerateDivinationTiers(
     league_name, download_mode, 2, exfilter.exception_from_section("Divination Cards")
 )
 
-exfilter.sections["Divination Cards"].categories["Divination T1"].seta(BaseType=div_ex)
+exfilter.sections["Divination Cards"].categories["Divination T1"].seta(
+    [("BaseType", div_ex)]
+)
 exfilter.sections["Divination Cards"].categories["Divination Garbage"].seta(
-    BaseType=div_garbage
+    [("BaseType", div_garbage)]
 )
 
 # Uniques Tiering
@@ -492,8 +505,10 @@ unique_garbage, unique_ex, unique_mixed = poetiergen2.GenerateUniqueTiers(
     league_name, download_mode, 8, exfilter.exception_from_section("Uniques")
 )
 
-exfilter.sections["Uniques"].categories["Uniques T1"].seta(BaseType=unique_ex)
-exfilter.sections["Uniques"].categories["Uniques Garbage"].seta(BaseType=unique_garbage)
+exfilter.sections["Uniques"].categories["Uniques T1"].seta([("BaseType", unique_ex)])
+exfilter.sections["Uniques"].categories["Uniques Garbage"].seta(
+    [("BaseType", unique_garbage)]
+)
 
 path_to_filter = r"testoutput.filter"
 

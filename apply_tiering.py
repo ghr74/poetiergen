@@ -11,7 +11,7 @@ shaperelder_cutoff = 15
 divination_cutoff = 2
 uniques_cutoff = 8
 
-exfilter = pf.FilterObj(source_file=filter_file_name)
+exfilter = pf.FilterObj().from_file(filter_file_name)
 
 # Shaper/Elder Tiering
 

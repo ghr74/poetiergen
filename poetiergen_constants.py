@@ -19,7 +19,7 @@ json_unique_filepaths = [
     "test_data\GetUniqueMapOverview.json",
 ]
 json_div_filepath = "test_data\GetDivinationCardsOverview.json"
-json_bases_filepath = "test_dta\GetBaseTypeOverview.json"
+json_bases_filepath = "test_data\GetBaseTypeOverview.json"
 
 bases_useless_columns = [
     "artFilename",

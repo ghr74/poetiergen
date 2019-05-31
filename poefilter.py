@@ -2,7 +2,6 @@ import copy
 from collections import defaultdict
 from textwrap import dedent, indent
 from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Union
-
 from poepy_core import BaseTypeString
 
 SHOW = 1
@@ -111,6 +110,9 @@ class Category:
     def __getitem__(self, key: str) -> Any:
         return self.attributes.get(key)
 
+    def get_base_type(self) -> List[str]:
+        return self.attributes.get("BaseType", [])
+
     def __setitem__(self, key: str, value: Any) -> None:
         self.attributes[key] = value
 
@@ -138,15 +140,18 @@ class Section:
         comment: str = "UNTITLED SECTION",
         tags: List[str] = [],
         *initial_categories,
-    ):
+    ) -> None:
         self.comment = comment
         self.tags = tags
         self.categories: Dict[str, Category] = {}
         for category in initial_categories:
             self.append(category)
 
-    def append(self, category):
+    def append(self, category) -> None:
         self.categories[category.comment] = category
+
+    def __len__(self) -> int:
+        return len(self.categories)
 
     def __getitem__(self, key: str) -> Category:
         if key in self.categories:
@@ -157,7 +162,7 @@ class Section:
     def __setitem__(self, key: str, value: Category) -> None:
         self.categories[key] = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         ret = ""
         ret += f'#{"---"*36}\n'
         ret += f"# Section:\t#\t{self.comment}{''.join([f' ~ {tag}' for tag in self.tags])}\n"
@@ -167,7 +172,7 @@ class Section:
                 ret += indent(f"{category}", "\t")
         return ret
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 
@@ -242,11 +247,21 @@ class FilterObj:
             if "Exception" in cat.comment
         ]
 
+    def basetypes_from_tag(self, tag: str) -> List[str]:
+        ret: List[str] = []
+        for tagged in self.tags[tag]:
+            if isinstance(tagged, Category):
+                ret.extend(tagged.get_base_type())
+        return ret
+
     def apply_to_tag(
         self, tag: str, fun: Callable[[Union[Category, Section]], None]
     ) -> None:
         for tagged in self.tags[tag]:
             fun(tagged)
+
+    def __len__(self) -> int:
+        return len(self.sections)
 
     def __getitem__(self, key: str) -> Section:
         if key in self.sections:

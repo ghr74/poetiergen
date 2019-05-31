@@ -1,7 +1,7 @@
 import poefilter as pf
 import exfilter_styles as styles
 from poepy_core import write_to_file
-import poetiergen2
+import poetiergen
 
 league_name = r"Synthesis"
 download_mode = False
@@ -15,7 +15,7 @@ exfilter = pf.FilterObj().from_file(filter_file_name)
 
 # Shaper/Elder Tiering
 
-poetiergen2.GenerateShaperElderSectionFromTag(
+poetiergen.GenerateShaperElderSectionFromTag(
     league_name,
     download_mode,
     shaperelder_cutoff,
@@ -26,14 +26,14 @@ poetiergen2.GenerateShaperElderSectionFromTag(
 
 # Divination Tiering
 
-poetiergen2.GenerateDivinationTiersFromTag(
+poetiergen.GenerateDivinationTiersFromTag(
     league_name, download_mode, divination_cutoff, exfilter
 )
 
 
 # Uniques Tiering
 
-poetiergen2.GenerateUniqueTiersFromTag(
+poetiergen.GenerateUniqueTiersFromTag(
     league_name, download_mode, uniques_cutoff, exfilter
 )
 

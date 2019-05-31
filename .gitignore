@@ -6,6 +6,7 @@ __pycache__/
 *.sqlite
 *.png
 
+*.code-workspace
 notes/
 old_files/
 backupcopy.py

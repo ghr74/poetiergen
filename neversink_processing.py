@@ -24,17 +24,26 @@ from poepy_core import ternary
 import pandas as pd
 import decimal
 
-ns_drop_level_ignored_classes = {"rings", "amulets", "belts", "jewels", "daggers", "wands", "sceptres"}
+ns_drop_level_ignored_classes = {
+    "rings",
+    "amulets",
+    "belts",
+    "jewels",
+    "daggers",
+    "wands",
+    "sceptres",
+}
 
 averagePriceMinimum = 3
 approvedPricesMinimum = 8
 unhealthyPriceRange = 500
 # https://www.filterblade.xyz/datafiles/other/BasetypeStorage.csv
-bt = pd.read_csv('BasetypeStorage.csv')
+bt = pd.read_csv("BasetypeStorage.csv")
+
 
 def evaluate_div_cards(data):
     confidence = 1
-    stackSize = data['stackSize']
+    stackSize = data["stackSize"]
 
     confidence += ternary(stackSize <= 1, 0.2)
     confidence += ternary(stackSize <= 2, 0.1)
@@ -46,22 +55,30 @@ def evaluate_div_cards(data):
     # multiplier += this.AdjustPriceBasedOn(target, new Func<NinjaItem, bool>((NinjaItem s) => s.HasAspect("LargeRandomPoolAspect")), 0.1f);
     # multiplier += this.AdjustPriceBasedOn(target, new Func<NinjaItem, bool>((NinjaItem s) => s.HasAspect("CurrencyTypeAspect")), 0.1f);
 
-
-    confidence = float(decimal.Decimal(confidence).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP))
+    confidence = float(
+        decimal.Decimal(confidence).quantize(
+            decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP
+        )
+    )
     return confidence
 
+
 def evaluate_bases(data):
-    baseType = data.loc[:,'baseType'].iat[0]
+    baseType = data.loc[:, "baseType"].iat[0]
 
     confidence = 1
 
-    totalQuant = data['count'].sum()
-    minPrice = data['chaosValue'].min()
-    maxPrice = data['chaosValue'].max()
-    highestLevelPrice = data.sort_values(by='levelRequired', ascending=False)['chaosValue'].iat[0]
-    averagePrice = data.apply(lambda x: x['chaosValue']*x['count'], axis=1).sum() / totalQuant
+    totalQuant = data["count"].sum()
+    minPrice = data["chaosValue"].min()
+    maxPrice = data["chaosValue"].max()
+    highestLevelPrice = data.sort_values(by="levelRequired", ascending=False)[
+        "chaosValue"
+    ].iat[0]
+    averagePrice = (
+        data.apply(lambda x: x["chaosValue"] * x["count"], axis=1).sum() / totalQuant
+    )
 
-    progression = data.sort_values(by='levelRequired')['chaosValue'].diff().sum()
+    progression = data.sort_values(by="levelRequired")["chaosValue"].diff().sum()
 
     # correct pricepeak
     confidence += ternary(highestLevelPrice < maxPrice, -0.2, 0.1)
@@ -90,9 +107,9 @@ def evaluate_bases(data):
     confidence += ternary(maxPrice / minPrice > 25, -0.1, 0)
 
     # item info based rules
-    bt_ref = bt[bt['BaseType'].isin([baseType])]
+    bt_ref = bt[bt["BaseType"].isin([baseType])]
     if len(bt_ref) > 0:
-        itemClass, dropLevel = bt_ref.loc[:,['Class','DropLevel']].values.tolist()[0]
+        itemClass, dropLevel = bt_ref.loc[:, ["Class", "DropLevel"]].values.tolist()[0]
         if itemClass.lower() not in ns_drop_level_ignored_classes and dropLevel != 0:
             confidence += ternary(dropLevel < 70, 0, 0.05)
             confidence += ternary(dropLevel < 60, -0.05, 0.05)
@@ -102,6 +119,10 @@ def evaluate_bases(data):
             confidence += ternary(dropLevel < 20, -0.15, 0)
             confidence += ternary(dropLevel < 10, -0.2, 0)
 
-    confidence = float(decimal.Decimal(confidence).quantize(decimal.Decimal('0.01'), rounding=decimal.ROUND_HALF_UP))
+    confidence = float(
+        decimal.Decimal(confidence).quantize(
+            decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP
+        )
+    )
     return confidence
     # print(f'{baseType:<30}|{variant:^10}|{highestLevelPrice:^10}|{progression:^20}|{confidence:^10}')

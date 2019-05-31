@@ -1,5 +1,7 @@
 import poefilter as pf
 
+# fmt: off
+
 STYLE_QUEST_EXTRA_SPECIAL = pf.Style(
     SetTextColor = "255 255 255 255",
     SetBorderColor = "255 255 255 255",
@@ -187,3 +189,5 @@ STYLE_HIDEALL = pf.Style(
     SetBorderColor = "00 00 00 0",
     SetTextColor = "00 00 00 0",
 )
+
+# fmt: on

@@ -2,7 +2,7 @@
 import itertools
 import json
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import regex
 import requests
@@ -10,7 +10,7 @@ import requests
 import poepy_core as core
 import poetiergen_calcs as calcs
 import poetiergen_constants as constants
-from poefilter import Category, Section, Style
+from poefilter import Category, FilterObj, Section, Style
 
 # def FilteryThingy(filter_file_name, league_name, armed_mode=False,
 # uniques_exception_category=None, divination_exception_category=None,
@@ -82,9 +82,29 @@ def GenerateDivinationTiers(
     print(divination_exceptions)
     div_data = core.GetDivinationData(league_name, download_mode)
     div_garbage, div_ex = calcs.calc_div_cards(
-        min_price, div_data, divination_exceptions
-    )
+        download_mode, div_data, divination_exceptions
+    ).as_garbo_ex(min_price, "name")
     return div_garbage, div_ex
+
+
+def overwrite_bt(cat: Union[Category, Section], bt: List[str]) -> None:
+    assert len(bt) > 0
+    if isinstance(cat, Category):
+        cat.seta([("BaseType", bt)])
+
+
+def GenerateDivinationTiersFromTag(
+    league_name: str, download_mode: bool, min_price: float, filter_: FilterObj
+) -> None:
+    # core.SetURLs(league_name)
+    divination_exceptions = filter_.basetypes_from_tag("DivException")
+    print(divination_exceptions)
+    div_data = core.GetDivinationData(league_name, download_mode)
+    div_garbage, div_ex = calcs.calc_div_cards(
+        download_mode, div_data, divination_exceptions
+    ).as_garbo_ex(min_price, "name")
+    filter_.apply_to_tag("DivExalt", lambda cat: overwrite_bt(cat, div_ex))
+    filter_.apply_to_tag("DivGarbage", lambda cat: overwrite_bt(cat, div_garbage))
 
 
 def GenerateUniqueTiers(
@@ -105,6 +125,23 @@ def GenerateUniqueTiers(
     return unique_garbage, unique_ex, unique_mixed
 
 
+def GenerateUniqueTiersFromTag(
+    league_name: str, download_mode: bool, min_price: float, filter_: FilterObj
+) -> None:
+    # core.SetURLs(league_name)
+    unique_exceptions: List[str] = filter_.basetypes_from_tag("UniquesException")
+    print(unique_exceptions)
+    unique_data = core.GetUniquesData(league_name, download_mode)
+    unique_garbage, unique_ex, unique_mixed = calcs.calc_uniques(
+        min_price, unique_data, unique_exceptions
+    )
+    filter_.apply_to_tag("UniquesExalt", lambda cat: overwrite_bt(cat, unique_ex))
+    filter_.apply_to_tag("UniquesMixed", lambda cat: overwrite_bt(cat, unique_mixed))
+    filter_.apply_to_tag(
+        "UniquesGarbage", lambda cat: overwrite_bt(cat, unique_garbage)
+    )
+
+
 def GenerateShaperElderSection(
     league_name: str,
     section: Section,
@@ -115,7 +152,9 @@ def GenerateShaperElderSection(
 ) -> Section:
     # core.SetURLs(league_name)
     bases_data = core.GetBasesData(league_name, download_mode)
-    bases_chaos, bases_ex = calcs.calc_item_bases(min_price, bases_data)
+    bases_chaos, bases_ex = calcs.calc_item_bases(
+        download_mode, bases_data
+    ).as_chaos_ex_frames(min_price)
     for tier, baseDataframe in enumerate((bases_ex, bases_chaos), start=1):
         for (variant, ilvl), group in baseDataframe.groupby(
             ["variant", "levelRequired"]
@@ -135,3 +174,38 @@ def GenerateShaperElderSection(
                 )
             )
     return section
+
+
+def cat_to_section(section, cat):
+    assert isinstance(section, Section)
+    section.append(cat)
+
+
+def GenerateShaperElderSectionFromTag(
+    league_name: str,
+    download_mode: bool,
+    min_price: float,
+    style_chaos: Style,
+    style_ex: Style,
+    filter_: FilterObj,
+) -> None:
+    bases_data = core.GetBasesData(league_name, download_mode)
+    bases_chaos, bases_ex = calcs.calc_item_bases(min_price, bases_data)
+    for tier, baseDataframe in enumerate((bases_ex, bases_chaos), start=1):
+        for (variant, ilvl), group in baseDataframe.groupby(
+            ["variant", "levelRequired"]
+        ):
+            base_type_list = group["baseType"].values.tolist()
+            cat = Category(
+                f"Bases-{variant}-{ilvl}-T{tier}",
+                ShaperItem=True if "Shaper" in variant else None,
+                ElderItem=True if "Elder" in variant else None,
+                ItemLevel=((">=" if ilvl == 86 else "=") + f" {ilvl}")
+                if ilvl > 0
+                else None,
+                Rarity="<= Rare",
+                BaseType=base_type_list,
+                Style=style_ex if tier == 1 else style_chaos,
+            )
+            filter_.apply_to_tag("ShaperElder", lambda sec: cat_to_section(sec, cat))
+

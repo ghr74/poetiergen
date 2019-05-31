@@ -23,7 +23,8 @@
 from poepy_core import ternary
 import pandas as pd
 import decimal
-from poetiergen_constants import ns_drop_level_ignored_classes
+
+ns_drop_level_ignored_classes = {"rings", "amulets", "belts", "jewels", "daggers", "wands", "sceptres"}
 
 averagePriceMinimum = 3
 approvedPricesMinimum = 8

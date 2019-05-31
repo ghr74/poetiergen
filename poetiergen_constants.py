@@ -1,23 +1,31 @@
 import os
 
+# json_unique_filepaths = [
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueArmourOverview.json'),
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueWeaponOverview.json'),
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueFlaskOverview.json'),
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueAccessoryOverview.json'),
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueJewelOverview.json'),
+#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueMapOverview.json')
+# ]
+# json_div_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetDivinationCardsOverview.json')
+# json_bases_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetBaseTypeOverview.json')
 json_unique_filepaths = [
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueArmourOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueWeaponOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueFlaskOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueAccessoryOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueJewelOverview.json'),
-    os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetUniqueMapOverview.json')
+    'test_data\GetUniqueArmourOverview.json',
+    'test_data\GetUniqueWeaponOverview.json',
+    'test_data\GetUniqueFlaskOverview.json',
+    'test_data\GetUniqueAccessoryOverview.json',
+    'test_data\GetUniqueJewelOverview.json',
+    'test_data\GetUniqueMapOverview.json',
 ]
-json_div_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetDivinationCardsOverview.json')
-json_bases_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\GetBaseTypeOverview.json')
-
-ns_drop_level_ignored_classes = ["rings", "amulets", "belts", "jewels", "daggers", "wands", "sceptres"]
+json_div_filepath = 'test_data\GetDivinationCardsOverview.json'
+json_bases_filepath = 'test_dta\GetBaseTypeOverview.json'
 
 bases_useless_columns = [
-    'artFilename', 
-    'corrupted', 
-    'explicitModifiers', 
-    'flavourText', 
+    'artFilename',
+    'corrupted',
+    'explicitModifiers',
+    'flavourText',
     'gemLevel',
     'gemQuality',
     'icon',

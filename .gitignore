@@ -4,9 +4,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.sqlite
+*.png
 
+notes/
 old_files/
 backupcopy.py
 poetiergen.txt
 testoutput.txt
+testoutput*.filter
 testing.py

@@ -1,5 +1,6 @@
 #! python3.6
 
+from typing import Any, List
 import json
 import regex
 from timeit import default_timer as timer
@@ -36,8 +37,7 @@ def DownloadJson(league_param, type_param):
     r.encoding = 'ISO-8859-1'
     return r.json().get('lines')
 
-def GetDivinationData(league=None, download=False):
-    div_data = {}
+def GetDivinationData(league: str = None, download: bool = False) -> dict:
     if download and league is not None:
         print("Starting Download...")
         div_data = DownloadJson(league, 'DivinationCard')
@@ -46,8 +46,7 @@ def GetDivinationData(league=None, download=False):
         div_data = FileToJson(constants.json_div_filepath)
     return div_data
 
-def GetBasesData(league=None, download=False):
-    bases_data = {}
+def GetBasesData(league: str = None, download: bool = False) -> dict:
     if download and league is not None:
         print(f"Starting Download...")
         bases = DownloadJson(league, 'BaseType')
@@ -56,7 +55,7 @@ def GetBasesData(league=None, download=False):
         bases = FileToJson(constants.json_bases_filepath)
     return bases
 
-def GetUniquesData(league=None, download=False):
+def GetUniquesData(league: str = None, download: bool = False) -> List[dict]:
     uniques_data = []
     param_uniques = ['UniqueArmour', 'UniqueWeapon', 'UniqueFlask', 'UniqueAccessory', 'UniqueJewel', 'UniqueMap']
     if download and league is not None:
@@ -69,29 +68,29 @@ def GetUniquesData(league=None, download=False):
             uniques_data.append(FileToJson(path))
     return uniques_data
 
-def GetAllJsonData(download=False):
-    uniques_data = []
-    div_data, bases_data = {}, {}
-    if download:
-        print("Starting Download...")
-        for url in url_uniques:
-            uniques_data.append(DownloadJson(url))
-        div_data = DownloadJson(url_div)
-        bases_data = DownloadJson(url_bases)
-        print("Download / Load complete.")
-    else:
-        for path in constants.json_unique_filepaths:
-            uniques_data.append(FileToJson(path))
+# def GetAllJsonData(download=False):
+#     uniques_data = []
+#     div_data, bases_data = {}, {}
+#     if download:
+#         print("Starting Download...")
+#         for url in url_uniques:
+#             uniques_data.append(DownloadJson(url))
+#         div_data = DownloadJson(url_div)
+#         bases_data = DownloadJson(url_bases)
+#         print("Download / Load complete.")
+#     else:
+#         for path in constants.json_unique_filepaths:
+#             uniques_data.append(FileToJson(path))
 
-        div_data = FileToJson(constants.json_div_filepath)
-        bases_data = FileToJson(constants.json_bases_filepath)
-    return uniques_data, div_data, bases_data
+#         div_data = FileToJson(constants.json_div_filepath)
+#         bases_data = FileToJson(constants.json_bases_filepath)
+#     return uniques_data, div_data, bases_data
 
 def GenerateCategoryBlock(meta_category, effect_config, base_type_string, tier=0, ilvl=0, variant=""):
     variant_string = "ShaperItem True\n" if 'Shaper' in variant else "ElderItem True\n" if 'Elder' in variant else ""
     ilvl_string = "ItemLevel " + (">=" if ilvl==86 else "=") + f' {ilvl}\n' if ilvl > 0 else ""
     effect_string = dedent(effect_config)
-    output_string = f'Show # {meta_category}-{variant}-{ilvl}-T{tier}\n' + indent(    
+    output_string = f'Show # {meta_category}-{variant}-{ilvl}-T{tier}\n' + indent(
             f'{variant_string}'
             f'{ilvl_string}'
             'Rarity <= Rare\n'
@@ -130,13 +129,17 @@ def replace(source_file_path, pattern, substring):
         file_string = source_file.read()
     file_string = regex.sub(pattern, substring, file_string)
     with open(source_file_path, 'w') as target_file:
-        target_file.write(file_string)  
+        target_file.write(file_string)
 
 def write_to_file(file_path, write_string):
     with open(file_path, 'w') as target_file:
-        target_file.write(str(write_string))  
+        target_file.write(str(write_string))
 
-def BaseTypeString(base_types):
+def BaseTypeString(base_types: list) -> str:
+    """
+    Return a space-joined string of the input list,
+    with each list entry pre- and suffixed by \"
+    """
     return ' '.join(f'"{base_type}"' for base_type in base_types).strip()
 
 def ReplaceCategory(path_to_filter, category, sublist):
@@ -145,11 +148,12 @@ def ReplaceCategory(path_to_filter, category, sublist):
 def ReplaceSection(path_to_filter, section, section_string):
     replace(path_to_filter, fr'(?:# {section}){{1}}(?m)(?:[\s]*Show # {section}[\s\S]*?(?:BaseType.*))*', section_string)
 
-def quicktime(fun):
+def quicktime(fun) -> float:
     start = timer()
     fun()
     end = timer()
     print(end-start)
+    return (end-start)
 
 def ternary(condition, true_value, false_value = 0):
     return (true_value if condition else false_value)

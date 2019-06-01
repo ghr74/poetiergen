@@ -19,13 +19,15 @@ def overwrite_bt(cat: Union[Category, Section], bt: List[str]) -> None:
         cat.seta([("BaseType", bt)])
 
 
-def cat_to_section(section, cat):
+def cat_to_section(section, cat) -> None:
     assert isinstance(section, Section)
     section.append(cat)
 
 
 class PoeTierGenerator:
-    def __init__(self, league_name: str, filter_: FilterObj, download: bool = False):
+    def __init__(
+        self, league_name: str, filter_: FilterObj, download: bool = False
+    ) -> None:
         self.league_name = league_name
         self.filter = filter_
         self.download = download

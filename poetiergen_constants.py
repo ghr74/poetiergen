@@ -36,6 +36,43 @@ bases_useless_columns = [
     "stackSize",
     "name",
     "itemClass",
+    "detailsId",
+]
+
+divs_useless_columns = [
+    "artFilename",
+    "links",
+    "mapTier",
+    "explicitModifiers",
+    "itemClass",
+    "itemType",
+    "levelRequired",
+    "prophecyText",
+    "variant",
+    "baseType",
+    "corrupted",
+    "flavourText",
+    "gemLevel",
+    "gemQuality",
+    "implicitModifiers",
+    "icon",
+]
+
+uniques_useless_columns = [
+    "artFilename",
+    "corrupted",
+    "prophecyText",
+    "variant",
+    "mapTier",
+    "explicitModifiers",
+    "implicitModifiers",
+    "itemClass",
+    "flavourText",
+    "gemLevel",
+    "gemQuality",
+    "icon",
+    "levelRequired",
+    "stackSize",
 ]
 
 NotDroppedList = [

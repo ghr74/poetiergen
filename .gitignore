@@ -6,7 +6,7 @@ __pycache__/
 *.sqlite
 *.png
 *.code-workspace
-
+restats
 .vscode/
 .mypy_cache
 notes/*
@@ -14,6 +14,6 @@ old_files/*
 backupcopy.py
 poetiergen.txt
 testoutput.txt
-testoutput*.filter
+test*.filter
 testing.py
 json_test.json

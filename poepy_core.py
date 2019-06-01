@@ -2,6 +2,8 @@
 
 import json
 import time
+import timeit
+from statistics import mean
 from textwrap import dedent, indent
 from timeit import default_timer as timer
 from typing import Any, Dict, List
@@ -23,6 +25,22 @@ category_regex = r"[\s\w]*BaseType\s\K.*"
 # league_name = LeagueName
 
 requests_cache.install_cache("ninja_data", expire_after=172800)
+
+
+class CodeTimer:
+    def __init__(self, name=None):
+        self.name = " '" + name + "'" if name else ""
+        self.times = []
+
+    def __enter__(self):
+        self.start = timeit.default_timer()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.took = (timeit.default_timer() - self.start) * 1000.0
+        self.times.append(self.took)
+        print(
+            "Code block" + self.name + " took: " + str(mean(self.times)) + "(mean) ms"
+        )
 
 
 def FileToJson(filepath: str) -> List[dict]:

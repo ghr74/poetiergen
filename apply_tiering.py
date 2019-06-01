@@ -5,7 +5,7 @@ from poetiergen import PoeTierGenerator
 
 league_name = r"Synthesis"
 download = False
-filter_file_name = r"testoutput2.filter"
+filter_file_name = r"testinput.filter"
 
 shaperelder_cutoff = 15
 divination_cutoff = 2

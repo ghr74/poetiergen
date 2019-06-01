@@ -27,7 +27,7 @@ category_regex = r"[\s\w]*BaseType\s\K.*"
 requests_cache.install_cache("ninja_data", expire_after=172800)
 
 
-class CodeTimer:
+class MeanTimer:
     def __init__(self, name=None):
         self.name = " '" + name + "'" if name else ""
         self.times = []

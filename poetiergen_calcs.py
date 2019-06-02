@@ -78,8 +78,7 @@ def calc_div_cards(
     df = pd.DataFrame.from_records(json_data, exclude=divs_useless_columns)
     df = df[~df["name"].isin(exceptions)]
     df.loc[:, "confidence"] = df.apply(neversink.evaluate_div_cards, axis=1)
-    df.loc[:, "aValue"] = df.apply(lambda x: x["chaosValue"] * x["confidence"], axis=1)
-
+    df.loc[:, "aValue"] = df["chaosValue"] * df["confidence"]
     df = df[["chaosValue", "exaltedValue", "name", "aValue"]]
 
     return EvaluatedData("DivinationCard", df)
@@ -106,16 +105,13 @@ def calc_uniques(
     )
     df = df[~df["baseType"].isin(exceptions)]
     df = df[(~df["name"].isin(NotDroppedList)) & (df["links"] < 5)]
-    # df = df.query(
-    #     "name not in @NotDroppedList and links < 5"
-    # )  # doing df[~df['name'].isin(NotDroppedList)][df['links']<5] is slightly faster but looks worse v0v
     df = df[["baseType", "chaosValue", "exaltedValue", "name"]]
     return EvaluatedData("Uniques", df)
 
 
 # Bases Tiering:
 
-# 7.44 s ± 151 ms per loop
+# 5.11 s ± 22.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 def calc_item_bases(league: str = None, download: bool = False) -> EvaluatedData:
     json_data = (
         core.GetBasesData(league, download)
@@ -123,30 +119,22 @@ def calc_item_bases(league: str = None, download: bool = False) -> EvaluatedData
         else core.FileToJson(json_bases_filepath)
     )
     df = pd.DataFrame.from_records(json_data, exclude=bases_useless_columns)
-    df = df[pd.notnull(df["variant"])]  # 1.28 ms ± 8.65 µs per loop
-    gvq = df.groupby(["variant", "baseType"])  # 89 µs ± 240 ns per loop
+    df = df[pd.notnull(df["variant"])]
+    gvq = df.groupby(["variant", "baseType"])
 
     def fun(group):
         group["confidence"] = neversink.evaluate_bases(group)
         return group
 
-    df = gvq.apply(fun)  # 5.97 s ± 168 ms per loop
+    df = gvq.apply(fun)
 
-    # df.loc[:, "aValue"] = df.apply(
-    #     lambda x: x["chaosValue"] * x["confidence"] if x["confidence"] > 0.35 else 0,
-    #     axis=1,  # 205 ms ± 808 µs per loop
-    # )
     m = df["confidence"] > 0.35
     df.loc[m, "aValue"] = df[m]["chaosValue"] * df[m]["confidence"]
-    df.loc[~m, "aValue"] = 0  # 8.48 ms ± 222 µs per loop
+    df.loc[~m, "aValue"] = 0
     df = df[
         ["baseType", "chaosValue", "exaltedValue", "aValue", "variant", "levelRequired"]
-    ]  # 1.02 ms ± 12.6 µs per loop
+    ]
     return EvaluatedData("ShaperElder", df)
-
-
-# calc_item_bases(poepy.FileToJson(json_filepath))
-# calc_div_cards(poepy.FileToJson(json_filepath))
 
 
 # Pandas snippets

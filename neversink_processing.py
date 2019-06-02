@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from poepy_core import ternary, CodeTimer
+from poepy_core import ternary, MeanTimer
 import pandas as pd
 import decimal
 
@@ -38,7 +38,11 @@ averagePriceMinimum = 3
 approvedPricesMinimum = 8
 unhealthyPriceRange = 500
 # https://www.filterblade.xyz/datafiles/other/BasetypeStorage.csv
-bt = pd.read_csv("BasetypeStorage.csv", usecols=["BaseType", "Class", "DropLevel"])
+bt = pd.read_csv(
+    "BasetypeStorage.csv",
+    usecols=["BaseType", "Class", "DropLevel"],
+    index_col=["BaseType"],
+)
 
 
 def evaluate_div_cards(data: pd.DataFrame) -> float:
@@ -64,24 +68,20 @@ def evaluate_div_cards(data: pd.DataFrame) -> float:
 
 
 # 3.35 ms ± 20.8 µs per loop group size: 5 entries
+# 1.58 ms ± 5.1 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each) group size: 5 entries
 def evaluate_bases(data: pd.DataFrame) -> float:
-    baseType = data.loc[:, "baseType"].iat[0]  # 54 µs ± 1.8 µs per loop
+    baseType = data.name[1]
 
     confidence = 1.0
 
-    totalQuant = data["count"].sum()  # 134 µs ± 3.9 µs per loop
-    minPrice = data["chaosValue"].min()  # 119 µs ± 5.1 µs per loop
-    maxPrice = data["chaosValue"].max()  # 115 µs ± 1.46 µs per loop
-    highestLevelPrice = data.sort_values(by="levelRequired", ascending=False)[
-        "chaosValue"  # 1.47 ms ± 43.3 µs per loop
-    ].iat[0]
-    averagePrice = (
-        data["chaosValue"] * data["count"]
-    ).sum() / totalQuant  # 292 µs ± 9.04 µs per loop
+    totalQuant = data["count"].sum()
+    minPrice = data["chaosValue"].min()
+    maxPrice = data["chaosValue"].max()
+    lrq_data = data.sort_values(by="levelRequired", ascending=False)
+    highestLevelPrice = lrq_data["chaosValue"].iat[-1]
+    averagePrice = (data["chaosValue"] * data["count"]).sum() / totalQuant
 
-    progression = (
-        data.sort_values(by="levelRequired")["chaosValue"].diff().sum()
-    )  # 1.74 ms ± 36.1 µs per loop
+    progression = lrq_data["chaosValue"].diff().sum()
 
     # correct pricepeak
     confidence += ternary(highestLevelPrice < maxPrice, -0.2, 0.1)
@@ -110,24 +110,20 @@ def evaluate_bases(data: pd.DataFrame) -> float:
     confidence += ternary(maxPrice / minPrice > 25, -0.1, 0)
 
     # item info based rules
-    bt_ref = bt[bt["BaseType"].isin([baseType])]  # 555 µs ± 1.45 µs per loop
-    if len(bt_ref) > 0:
-        itemClass, dropLevel = bt_ref.loc[:, ["Class", "DropLevel"]].values.tolist()[
-            0
-        ]  # 855 µs ± 2.43 µs per loop
-        if itemClass.lower() not in ns_drop_level_ignored_classes and dropLevel != 0:
-            confidence += ternary(dropLevel < 70, 0, 0.05)
-            confidence += ternary(dropLevel < 60, -0.05, 0.05)
-            confidence += ternary(dropLevel < 50, -0.05, 0)
-            confidence += ternary(dropLevel < 40, -0.1, 0)
-            confidence += ternary(dropLevel < 30, -0.1, 0)
-            confidence += ternary(dropLevel < 20, -0.15, 0)
-            confidence += ternary(dropLevel < 10, -0.2, 0)
+    itemClass, dropLevel = bt.loc[baseType]
+    if itemClass.lower() not in ns_drop_level_ignored_classes and dropLevel != 0:
+        confidence += ternary(dropLevel < 70, 0, 0.05)
+        confidence += ternary(dropLevel < 60, -0.05, 0.05)
+        confidence += ternary(dropLevel < 50, -0.05, 0)
+        confidence += ternary(dropLevel < 40, -0.1, 0)
+        confidence += ternary(dropLevel < 30, -0.1, 0)
+        confidence += ternary(dropLevel < 20, -0.15, 0)
+        confidence += ternary(dropLevel < 10, -0.2, 0)
 
     confidence = float(
         decimal.Decimal(confidence).quantize(
             decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP
-        )  # 1.92 µs ± 2.67 ns per loop
+        )
     )
     return confidence
     # print(f'{baseType:<30}|{variant:^10}|{highestLevelPrice:^10}|{progression:^20}|{confidence:^10}')

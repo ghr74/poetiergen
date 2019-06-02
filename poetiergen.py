@@ -1,15 +1,7 @@
 #! python3.6
-import itertools
-import json
-import os
 from typing import List, Tuple, Union
 
-import regex
-import requests
-
-import poepy_core as core
 import poetiergen_calcs as calcs
-import poetiergen_constants as constants
 from poefilter import Category, FilterObj, Section, Style
 
 
@@ -86,4 +78,3 @@ class PoeTierGenerator:
                 self.filter.apply_to_tag(
                     "ShaperElder", lambda sec: cat_to_section(sec, cat)
                 )
-

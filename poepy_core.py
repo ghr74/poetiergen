@@ -6,23 +6,13 @@ import timeit
 from statistics import mean
 from textwrap import dedent, indent
 from timeit import default_timer as timer
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 import regex
 import requests
 import requests_cache
 
 import poetiergen_constants as constants
-
-category_regex = r"[\s\w]*BaseType\s\K.*"
-# base_regex = r'(?:# %TB-Bases){1}(?m)(?:[\s]*Show # %TB-Bases[\s\S]*?(?:BaseType.*))*'
-
-# league_name = ""
-
-# def SetURLs(LeagueName):
-#     pass
-# global league_name
-# league_name = LeagueName
 
 requests_cache.install_cache("ninja_data", expire_after=172800)
 
@@ -45,7 +35,7 @@ class MeanTimer:
 
 def FileToJson(filepath: str) -> List[dict]:
     file_data = ""
-    with open(filepath, "r") as json_file:
+    with open(filepath, "r", encoding="utf-8") as json_file:
         file_data = json_file.read()
     return json.loads(file_data).get("lines")
 
@@ -102,100 +92,7 @@ def GetUniquesData(league: str = None, download: bool = False) -> List[List[dict
     return uniques_data
 
 
-# def GetAllJsonData(download=False):
-#     uniques_data = []
-#     div_data, bases_data = {}, {}
-#     if download:
-#         print("Starting Download...")
-#         for url in url_uniques:
-#             uniques_data.append(DownloadJson(url))
-#         div_data = DownloadJson(url_div)
-#         bases_data = DownloadJson(url_bases)
-#         print("Download / Load complete.")
-#     else:
-#         for path in constants.json_unique_filepaths:
-#             uniques_data.append(FileToJson(path))
-
-#         div_data = FileToJson(constants.json_div_filepath)
-#         bases_data = FileToJson(constants.json_bases_filepath)
-#     return uniques_data, div_data, bases_data
-
-
-def GenerateCategoryBlock(
-    meta_category, effect_config, base_type_string, tier=0, ilvl=0, variant=""
-):
-    variant_string = (
-        "ShaperItem True\n"
-        if "Shaper" in variant
-        else "ElderItem True\n"
-        if "Elder" in variant
-        else ""
-    )
-    ilvl_string = (
-        "ItemLevel " + (">=" if ilvl == 86 else "=") + f" {ilvl}\n" if ilvl > 0 else ""
-    )
-    effect_string = dedent(effect_config)
-    output_string = f"Show # {meta_category}-{variant}-{ilvl}-T{tier}\n" + indent(
-        f"{variant_string}"
-        f"{ilvl_string}"
-        "Rarity <= Rare\n"
-        f"BaseType {base_type_string}\n"
-        f"{effect_string}\n\n",
-        "\t",
-    )
-    return output_string
-
-
-def GenerateSectionBlock(baseDataframes, sectionSettings):
-    from textwrap import indent
-
-    if len(baseDataframes) == len(sectionSettings[2]):
-        bases_output_string = f"# {sectionSettings[0]}\n\n"
-        for tier, baseDataframe in enumerate(baseDataframes):
-            output_string = ""
-            for (n1, n2), group in baseDataframe.groupby(["variant", "levelRequired"]):
-                base_type_string = BaseTypeString(group["baseType"].values.tolist())
-                subcategory_string = GenerateCategoryBlock(
-                    sectionSettings[0],
-                    sectionSettings[2][tier],
-                    base_type_string,
-                    tier + 1,
-                    n2,
-                    n1,
-                )
-                output_string += indent(subcategory_string, "\t")
-            bases_output_string += output_string
-        return bases_output_string
-    else:
-        return "GIGAERROR LUL FIX YOUR SETTINGS"
-
-
-def scantier(filterpath, search):
-    with open(filterpath, "r") as filter_file:
-        file_string = filter_file.read()
-        res = regex.findall(search + category_regex, file_string)
-    if res:
-        return (
-            " ".join(res)
-            .split('"', 1)[1]
-            .rsplit('"', 1)[0]
-            .replace('" ', "")
-            .split('"')
-        )
-    else:
-        return []
-
-
-def replace(source_file_path, pattern, substring):
-    file_string = ""
-    with open(source_file_path, "r") as source_file:
-        file_string = source_file.read()
-    file_string = regex.sub(pattern, substring, file_string)
-    with open(source_file_path, "w") as target_file:
-        target_file.write(file_string)
-
-
-def write_to_file(file_path, write_string):
+def write_to_file(file_path: str, write_string: Any) -> None:
     with open(file_path, "w") as target_file:
         target_file.write(str(write_string))
 
@@ -208,19 +105,7 @@ def BaseTypeString(base_types: list) -> str:
     return " ".join(f'"{base_type}"' for base_type in base_types).strip()
 
 
-def ReplaceCategory(path_to_filter, category, sublist):
-    replace(path_to_filter, category + category_regex, BaseTypeString(sublist))
-
-
-def ReplaceSection(path_to_filter, section, section_string):
-    replace(
-        path_to_filter,
-        fr"(?:# {section}){{1}}(?m)(?:[\s]*Show # {section}[\s\S]*?(?:BaseType.*))*",
-        section_string,
-    )
-
-
-def quicktime(fun) -> float:
+def quicktime(fun: Callable) -> float:
     start = timer()
     fun()
     end = timer()
@@ -228,7 +113,7 @@ def quicktime(fun) -> float:
     return end - start
 
 
-def ternary(condition, true_value, false_value=0):
+def ternary(condition: bool, true_value: Any, false_value: Any = 0) -> Any:
     return true_value if condition else false_value
 
 

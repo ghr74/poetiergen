@@ -1,15 +1,8 @@
 import os
 
-# json_unique_filepaths = [
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueArmourOverview.json'),
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueWeaponOverview.json'),
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueFlaskOverview.json'),
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueAccessoryOverview.json'),
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueJewelOverview.json'),
-#     os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetUniqueMapOverview.json')
-# ]
-# json_div_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetDivinationCardsOverview.json')
-# json_bases_filepath = os.path.expanduser(r'~\Dropbox\programming\poetiergen\test_data\GetBaseTypeOverview.json')
+category_regex = r"[\s\w]*BaseType\s\K.*"
+base_regex = r"(?:# %TB-Bases){1}(?m)(?:[\s]*Show # %TB-Bases[\s\S]*?(?:BaseType.*))*"
+
 json_unique_filepaths = [
     "test_data\GetUniqueArmourOverview.json",
     "test_data\GetUniqueWeaponOverview.json",

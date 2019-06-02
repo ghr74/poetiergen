@@ -25,6 +25,10 @@ class PoeTierGenerator:
         self.download = download
 
     def GenerateDivinationTiersFromTag(self, min_price: float) -> None:
+        """
+        Mutate the Generator's filter to list the tiered Divination Card BaseTypes
+        in the Categories tagged DivExalt and DivGarbage
+        """
         divination_exceptions = self.filter.basetypes_from_tag("DivException")
         print(divination_exceptions)
         div_garbage, div_ex = calcs.calc_div_cards(
@@ -36,6 +40,10 @@ class PoeTierGenerator:
         )
 
     def GenerateUniqueTiersFromTag(self, min_price: float) -> None:
+        """
+        Mutate the Generator's filter to list the tiered Unique Items BaseTypes
+        in the Categories tagged UniquesExalt, UniquesMixed and UniquesGarbage
+        """
         unique_exceptions: List[str] = self.filter.basetypes_from_tag(
             "UniquesException"
         )
@@ -56,6 +64,10 @@ class PoeTierGenerator:
     def GenerateShaperElderSectionFromTag(
         self, min_price: float, style_chaos: Style, style_ex: Style
     ) -> None:
+        """
+        Mutate the Generator's filter to list the tiered Shaper/Elder BaseTypes
+        in the Section tagged ShaperElder
+        """
         bases_chaos, bases_ex = calcs.calc_item_bases(
             self.league_name, self.download
         ).as_chaos_ex_frames(min_price)

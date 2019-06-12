@@ -18,11 +18,14 @@ def cat_to_section(section, cat) -> None:
 
 class PoeTierGenerator:
     def __init__(
-        self, league_name: str, filter_: FilterObj, download: bool = False
+        self,
+        league_name: str,
+        filter_: FilterObj,
+        download: bool = False,
+        use_cache: bool = True,
     ) -> None:
-        self.league_name = league_name
         self.filter = filter_
-        self.download = download
+        self.calc = calcs.PoeTierCalculator(league_name, download, use_cache)
 
     def GenerateDivinationTiersFromTag(self, min_price: float) -> None:
         """
@@ -31,8 +34,8 @@ class PoeTierGenerator:
         """
         divination_exceptions = self.filter.basetypes_from_tag("DivException")
         print(divination_exceptions)
-        div_garbage, div_ex = calcs.calc_div_cards(
-            self.league_name, self.download, divination_exceptions
+        div_garbage, div_ex = self.calc.calc_div_cards(
+            divination_exceptions
         ).as_garbo_ex(min_price, "name")
         self.filter.apply_to_tag("DivExalt", lambda cat: overwrite_bt(cat, div_ex))
         self.filter.apply_to_tag(
@@ -48,8 +51,8 @@ class PoeTierGenerator:
             "UniquesException"
         )
         print(unique_exceptions)
-        unique_garbage, unique_ex, unique_mixed = calcs.calc_uniques(
-            self.league_name, self.download, unique_exceptions
+        unique_garbage, unique_ex, unique_mixed = self.calc.calc_uniques(
+            unique_exceptions
         ).as_garbo_ex_mixed(min_price)
         self.filter.apply_to_tag(
             "UniquesExalt", lambda cat: overwrite_bt(cat, unique_ex)
@@ -68,9 +71,9 @@ class PoeTierGenerator:
         Mutate the Generator's filter to list the tiered Shaper/Elder BaseTypes
         in the Section tagged ShaperElder
         """
-        bases_chaos, bases_ex = calcs.calc_item_bases(
-            self.league_name, self.download
-        ).as_chaos_ex_frames(min_price)
+        bases_chaos, bases_ex = self.calc.calc_item_bases().as_chaos_ex_frames(
+            min_price
+        )
         for tier, baseDataframe in enumerate((bases_ex, bases_chaos), start=1):
             for (variant, ilvl), group in baseDataframe.groupby(
                 ["variant", "levelRequired"]

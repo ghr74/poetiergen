@@ -43,35 +43,49 @@ def FileToJson(filepath: str) -> List[dict]:
 # MORE URL PARAMS: Essences: 'Essence', Currency: 'Currency', Fragments: 'Fragment', Scarabs: 'Scarab', Fossils: 'Fossil', Resonators: 'Resonator'
 
 
-def DownloadJson(league_param: str, type_param: str) -> List[Dict]:
+def DownloadJson(
+    league_param: str, type_param: str, use_cache: bool = True
+) -> List[Dict]:
     payload = {"league": league_param, "type": type_param}
-    r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
-    print(f"Downloaded from: {r.url} - {r.from_cache}")  # type: ignore
-    r.encoding = "ISO-8859-1"
+    if use_cache:
+        r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
+        print(f"Downloaded from: {r.url} - Cache: {r.from_cache}")  # type: ignore
+    else:
+        with requests_cache.disabled():
+            r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
+            print(f"Downloaded from: {r.url} - Cache: False")  # type: ignore
+
+    r.encoding = "utf-8"
     return r.json().get("lines")
 
 
-def GetDivinationData(league: str = None, download: bool = False) -> List[dict]:
+def GetDivinationData(
+    league: str = None, download: bool = False, use_cache: bool = True
+) -> List[dict]:
     if download and league is not None:
         print("Starting Download...")
-        div_data = DownloadJson(league, "DivinationCard")
+        div_data = DownloadJson(league, "DivinationCard", use_cache)
         print("Download complete.")
     else:
         div_data = FileToJson(constants.json_div_filepath)
     return div_data
 
 
-def GetBasesData(league: str = None, download: bool = False) -> List[dict]:
+def GetBasesData(
+    league: str = None, download: bool = False, use_cache: bool = True
+) -> List[dict]:
     if download and league is not None:
         print(f"Starting Download...")
-        bases = DownloadJson(league, "BaseType")
+        bases = DownloadJson(league, "BaseType", use_cache)
         print("Download complete.")
     else:
         bases = FileToJson(constants.json_bases_filepath)
     return bases
 
 
-def GetUniquesData(league: str = None, download: bool = False) -> List[List[dict]]:
+def GetUniquesData(
+    league: str = None, download: bool = False, use_cache: bool = True
+) -> List[List[dict]]:
     uniques_data = []
     param_uniques = [
         "UniqueArmour",
@@ -84,7 +98,7 @@ def GetUniquesData(league: str = None, download: bool = False) -> List[List[dict
     if download and league is not None:
         print("Starting Download...")
         for param in param_uniques:
-            uniques_data.append(DownloadJson(league, param))
+            uniques_data.append(DownloadJson(league, param, use_cache))
         print("Download complete.")
     else:
         for path in constants.json_unique_filepaths:

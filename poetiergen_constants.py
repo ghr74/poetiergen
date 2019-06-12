@@ -68,6 +68,8 @@ uniques_useless_columns = [
     "stackSize",
 ]
 
+# TODO: check if ' actually doesnt need to be escaped (look for string in dataframe)
+
 NotDroppedList = [
     # Award Only
     "Emperor's Mastery",
@@ -84,6 +86,22 @@ NotDroppedList = [
     "The Tempest's Binding",
     "The Rippling Thoughts",
     # Div Only / League Only
+    #   Legion
+    # "Rathpith Globe",
+    # "Pledge of Hands",
+    # "Rebuke of the Vaal",
+    # "Kaom's Primacy",
+    # "Lavianga's Wisdom",
+    # "Marohi Erqi",
+    # "Asenath's Gentle Touch",
+    # "Darkscorn",
+    # "Al Dhih",
+    # "Voll's Protector",
+    # "The Sorrow of the Divine",
+    # "Divinarius",
+    # "Honourhome",
+    # "Lioneye's Paws",
+    # "Maligaro's Virtuosity",
     #   Incursion
     "Apep's Slumber",
     "Apep's Supremacy",

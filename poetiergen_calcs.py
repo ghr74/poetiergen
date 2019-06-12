@@ -67,74 +67,82 @@ class EvaluatedData:
 # Div Card Tiering:
 
 
-def calc_div_cards(
-    league: str = None, download: bool = False, exceptions: List[str] = []
-) -> EvaluatedData:
-    json_data = (
-        core.GetDivinationData(league, download)
-        if download
-        else core.FileToJson(json_div_filepath)
-    )
-    df = pd.DataFrame.from_records(json_data, exclude=divs_useless_columns)
-    df = df[~df["name"].isin(exceptions)]
-    df.loc[:, "confidence"] = df.apply(neversink.evaluate_div_cards, axis=1)
-    df.loc[:, "aValue"] = df["chaosValue"] * df["confidence"]
-    df = df[["chaosValue", "exaltedValue", "name", "aValue"]]
+class PoeTierCalculator:
+    def __init__(
+        self, league: str = None, download: bool = False, use_cache: bool = True
+    ):
+        self.league = league
+        self.download = download
+        self.use_cache = use_cache
 
-    return EvaluatedData("DivinationCard", df)
+    def calc_div_cards(self,
+        exceptions: List[str] = []
+    ) -> EvaluatedData:
+        json_data = (
+            core.GetDivinationData(self.league, self.download, self.use_cache)
+            if self.download
+            else core.FileToJson(json_div_filepath)
+        )
+        df = pd.DataFrame.from_records(json_data, exclude=divs_useless_columns)
+        df = df[~df["name"].isin(exceptions)]
+        df.loc[:, "confidence"] = df.apply(neversink.evaluate_div_cards, axis=1)
+        df.loc[:, "aValue"] = df["chaosValue"] * df["confidence"]
+        df = df[["chaosValue", "exaltedValue", "name", "aValue"]]
 
-
-# Uniques Tiering:
-
-
-def calc_uniques(
-    league: str = None, download: bool = False, exceptions: List[str] = []
-) -> EvaluatedData:
-    json_data = (
-        core.GetUniquesData(league, download)
-        if download
-        else [core.FileToJson(js) for js in json_unique_filepaths]
-    )
-    df = pd.concat(
-        (
-            pd.DataFrame.from_records(f, exclude=uniques_useless_columns)
-            for f in json_data
-        ),
-        ignore_index=True,
-        sort=True,
-    )
-    df = df[~df["baseType"].isin(exceptions)]
-    df = df[(~df["name"].isin(NotDroppedList)) & (df["links"] < 5)]
-    df = df[["baseType", "chaosValue", "exaltedValue", "name"]]
-    return EvaluatedData("Uniques", df)
+        return EvaluatedData("DivinationCard", df)
 
 
-# Bases Tiering:
+    # Uniques Tiering:
 
-# 5.11 s ± 22.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-def calc_item_bases(league: str = None, download: bool = False) -> EvaluatedData:
-    json_data = (
-        core.GetBasesData(league, download)
-        if download
-        else core.FileToJson(json_bases_filepath)
-    )
-    df = pd.DataFrame.from_records(json_data, exclude=bases_useless_columns)
-    df = df[pd.notnull(df["variant"])]
-    gvq = df.groupby(["variant", "baseType"])
 
-    def fun(group):
-        group["confidence"] = neversink.evaluate_bases(group)
-        return group
+    def calc_uniques(self,
+        exceptions: List[str] = []
+    ) -> EvaluatedData:
+        json_data = (
+            core.GetUniquesData(self.league, self.download, self.use_cache)
+            if self.download
+            else [core.FileToJson(js) for js in json_unique_filepaths]
+        )
+        df = pd.concat(
+            (
+                pd.DataFrame.from_records(f, exclude=uniques_useless_columns)
+                for f in json_data
+            ),
+            ignore_index=True,
+            sort=True,
+        )
+        df = df[~df["baseType"].isin(exceptions)]
+        df = df[(~df["name"].isin(NotDroppedList)) & (df["links"] < 5)]
+        df = df[["baseType", "chaosValue", "exaltedValue", "name"]]
+        return EvaluatedData("Uniques", df)
 
-    df = gvq.apply(fun)
 
-    m = df["confidence"] > 0.35
-    df.loc[m, "aValue"] = df[m]["chaosValue"] * df[m]["confidence"]
-    df.loc[~m, "aValue"] = 0
-    df = df[
-        ["baseType", "chaosValue", "exaltedValue", "aValue", "variant", "levelRequired"]
-    ]
-    return EvaluatedData("ShaperElder", df)
+    # Bases Tiering:
+
+    # 5.11 s ± 22.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    def calc_item_bases(self) -> EvaluatedData:
+        json_data = (
+            core.GetBasesData(self.league, self.download, self.use_cache)
+            if self.download
+            else core.FileToJson(json_bases_filepath)
+        )
+        df = pd.DataFrame.from_records(json_data, exclude=bases_useless_columns)
+        df = df[pd.notnull(df["variant"])]
+        gvq = df.groupby(["variant", "baseType"])
+
+        def fun(group):
+            group["confidence"] = neversink.evaluate_bases(group)
+            return group
+
+        df = gvq.apply(fun)
+
+        m = df["confidence"] > 0.35
+        df.loc[m, "aValue"] = df[m]["chaosValue"] * df[m]["confidence"]
+        df.loc[~m, "aValue"] = 0
+        df = df[
+            ["baseType", "chaosValue", "exaltedValue", "aValue", "variant", "levelRequired"]
+        ]
+        return EvaluatedData("ShaperElder", df)
 
 
 # Pandas snippets

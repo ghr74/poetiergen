@@ -6,7 +6,7 @@ import timeit
 from statistics import mean
 from textwrap import dedent, indent
 from timeit import default_timer as timer
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Set
 
 import regex
 import requests
@@ -20,7 +20,7 @@ requests_cache.install_cache("ninja_data", expire_after=172800)
 class MeanTimer:
     def __init__(self, name=None):
         self.name = " '" + name + "'" if name else ""
-        self.times = []
+        self.times: List[float] = []
 
     def __enter__(self):
         self.start = timeit.default_timer()
@@ -44,15 +44,17 @@ def FileToJson(filepath: str) -> List[dict]:
 
 
 def DownloadJson(
-    league_param: str, type_param: str, use_cache: bool = True
+    league_param: str, type_param: str, use_cache: bool = True, type_: str = "item"
 ) -> List[Dict]:
     payload = {"league": league_param, "type": type_param}
     if use_cache:
-        r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
+        r = requests.get(f"https://poe.ninja/api/data/{type_}overview", params=payload)
         print(f"Downloaded from: {r.url} - Cache: {r.from_cache}")  # type: ignore
     else:
         with requests_cache.disabled():
-            r = requests.get("https://poe.ninja/api/data/itemoverview", params=payload)
+            r = requests.get(
+                f"https://poe.ninja/api/data/{type_}overview", params=payload
+            )
             print(f"Downloaded from: {r.url} - Cache: False")  # type: ignore
 
     r.encoding = "utf-8"
@@ -69,6 +71,18 @@ def GetDivinationData(
     else:
         div_data = FileToJson(constants.json_div_filepath)
     return div_data
+
+
+def GetFragmentData(
+    league: str = None, download: bool = False, use_cache: bool = True
+) -> List[dict]:
+    if download and league is not None:
+        print("Starting Download...")
+        fragment_data = DownloadJson(league, "Fragment", use_cache, "currency")
+        print("Download complete.")
+    else:
+        fragment_data = FileToJson(constants.json_fragments_filepath)
+    return fragment_data
 
 
 def GetBasesData(
@@ -132,7 +146,7 @@ def ternary(condition: bool, true_value: Any, false_value: Any = 0) -> Any:
 
 
 def InvestigatedItem(item):
-    inv_set = {
+    inv_set = {  # type: ignore
         # ('Marble Amulet', 86, 'Normal'),
         # ('Prismatic Ring', 82, 'Shaper'),
         # ('Latticed Ringmail', 84, 'Elder'),

@@ -10,7 +10,7 @@ restats
 .vscode/
 .mypy_cache
 notes/*
-old_files/*
+old_files/
 backupcopy.py
 poetiergen.txt
 testoutput.txt

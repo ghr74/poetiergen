@@ -4,15 +4,15 @@ from poepy_core import write_to_file
 from poetiergen import PoeTierGenerator
 import os
 
-league_name = r"Legion"
+league_name = r"Blight"
 download = True
-use_cache = False
-input_filter = r"ExfilterLegion.filter"
+use_cache = True
+input_filter = r"ExfilterBlight.filter"
 output_filter = r"ExfilterGen.filter"
 
-shaperelder_cutoff = 10
+shaperelder_cutoff = 6
 divination_cutoff = 0.8
-uniques_cutoff = 5
+uniques_cutoff = 2
 
 input_filter = os.path.join(
     os.path.expanduser(r"~\Documents\My Games\Path of Exile"), input_filter

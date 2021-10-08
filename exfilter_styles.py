@@ -16,7 +16,7 @@ STYLE_EXPLICIT_MOD = pf.Style(
     PlayAlertSound = "3 300",
     MinimapIcon = "0 Green Diamond",
     PlayEffect = "Green Temp",
-    CustomAlertSound = pf.CustomSound('RareItem'),
+    CustomAlertSound = pf.CustomSound('RareItem'),  
 )
 STYLE_DIVINE_RECIPE = pf.Style(
     SetTextColor = "0 0 0 255",

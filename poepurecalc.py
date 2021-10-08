@@ -1,13 +1,9 @@
 #! python3.6
-import requests
-import json
-import os
-import time
 from poepy_core import GetFragmentData
 
 download_mode = True
 
-league_name = r"Blight"
+league_name = r"Ultimatum"
 
 price_data = {
     "Chayula": {"pure": 0, "base": 0},
@@ -24,8 +20,8 @@ def ProcessJsonData(data):
 
     for item in data:
         item_name = item.get("currencyTypeName")
-        if any(prefix in item_name for prefix in price_data.keys()):
-            item_price = item.get("chaosEquivalent")
+        if any(item_name.startswith(prefix) for prefix in price_data.keys()):
+            item_price = item.get("receive").get("value")
             breachlord = item_name.split(" ")[0].replace("'s", "")
             if "Pure" in item_name:
                 price_data[breachlord]["pure"] = item_price

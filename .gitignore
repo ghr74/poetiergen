@@ -8,6 +8,7 @@ __pycache__/
 *.code-workspace
 restats
 .vscode/
+.idea/
 .mypy_cache
 notes/*
 old_files/

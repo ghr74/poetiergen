@@ -14,6 +14,7 @@ json_unique_filepaths = [
 json_div_filepath = "test_data\GetDivinationCardsOverview.json"
 json_bases_filepath = "test_data\GetBaseTypeOverview.json"
 json_fragments_filepath = "test_data\GetFragmentOverview.json"
+json_watchstones_filepath = "test_data\GetWatchstoneOverview.json"
 
 bases_useless_columns = [
     "artFilename",

@@ -40,7 +40,7 @@ def FileToJson(filepath: str) -> List[dict]:
     return json.loads(file_data).get("lines")
 
 
-# MORE URL PARAMS: Essences: 'Essence', Currency: 'Currency', Fragments: 'Fragment', Scarabs: 'Scarab', Fossils: 'Fossil', Resonators: 'Resonator'
+# MORE URL PARAMS: Essences: 'Essence', Currency: 'Currency', Fragments: 'Fragment', Scarabs: 'Scarab', Fossils: 'Fossil', Resonators: 'Resonator', Watchstones: 'Watchstone'
 
 
 def DownloadJson(
@@ -118,6 +118,18 @@ def GetUniquesData(
         for path in constants.json_unique_filepaths:
             uniques_data.append(FileToJson(path))
     return uniques_data
+
+
+def GetWatchstoneData(
+    league: str = None, download: bool = False, use_cache: bool = True
+) -> List[dict]:
+    if download and league is not None:
+        print("Starting Download...")
+        watchstone_data = DownloadJson(league, "Watchstone", use_cache)
+        print("Download complete.")
+    else:
+        watchstone_data = FileToJson(constants.json_watchstones_filepath)
+    return watchstone_data
 
 
 def write_to_file(file_path: str, write_string: Any) -> None:
